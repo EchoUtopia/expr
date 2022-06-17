@@ -53,7 +53,7 @@ func ExampleEvaluate() {
 }
 ```
 
-## full one
+## with custom functions
 
 ```go
 

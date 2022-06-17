@@ -251,6 +251,19 @@ func ExampleEvaluate() {
 	// true
 }
 
+func BenchmarkEvaluate(b *testing.B) {
+	expr := `$car in ('bwm', 'byd') and (3 + 2) * 2.0 = 10 and startsWith($car, 'b')`
+	variables := map[string]interface{}{`car`: `byd`}
+	for i := 0; i < b.N; i++ {
+		_, err := Evaluate(expr, variables)
+		if err != nil {
+			panic(err)
+		}
+
+	}
+
+}
+
 func ExampleParseAndEvaluate() {
 	expr := `$car in ('bwm', 'byd') and (3 + echo_int(2)) * 2.0 = 10 and startsWith($car, 'b')`
 	var tInt = func(a int64) int64 {
