@@ -3,9 +3,10 @@ package expr
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestBoolEvaluator(t *testing.T) {
@@ -104,7 +105,7 @@ func TestInEvaluate(t *testing.T) {
 		`(a+b) in (1,2,3)`,
 	}
 	for _, v := range invalids {
-		_, err := Evaluate(v, vars, nil)
+		_, err := Evaluate(v, vars)
 		require.NotNil(t, err, v)
 	}
 	//return
@@ -146,14 +147,12 @@ func TestFunctionEvaluator(t *testing.T) {
 	trues := []string{
 		`testArgs($int, $float, true, $string)`,
 		`testArgs($int, $float, $true, $string)`,
-		`hasIntersection('a,b,c', 'a,c')`,
 		`contains('abc', 'ab')`,
 		`endsWith('abc', 'bc')`,
 		`startsWith('abc', 'ab')`,
 		`length('abc')=3`,
 		`toLower('ABC')='abc'`,
 		`toUpper($string)='STR'`,
-		`geoWithin2d($coord2d, '0, 0', '2,2')`,
 	}
 
 	for _, v := range trues {
@@ -164,7 +163,6 @@ func TestFunctionEvaluator(t *testing.T) {
 	}
 
 	falses := []string{
-		`hasIntersection('a,b,c', 'd,e')`,
 		`contains('abc', 'ac')`,
 		`endsWith('abc', 'ab')`,
 		`startsWith('abc', 'bc')`,
@@ -222,7 +220,7 @@ func TestFuncError(t *testing.T) {
 }
 
 func testEvaluator(t *testing.T, expr string, vars map[string]interface{}, expect bool) {
-	result, err := Evaluate(expr, vars, nil)
+	result, err := Evaluate(expr, vars)
 	require.Equal(t, nil, err, expr, err)
 	require.Equal(t, expect, result, expr)
 }
@@ -244,7 +242,7 @@ func TestCheckVariables(t *testing.T) {
 func ExampleEvaluate() {
 	expr := `$car in ('bwm', 'byd') and (3 + 2) * 2.0 = 10 and startsWith($car, 'b')`
 	variables := map[string]interface{}{`car`: `byd`}
-	result, err := Evaluate(expr, variables, nil)
+	result, err := Evaluate(expr, variables)
 	if err != nil {
 		panic(err)
 	}
@@ -255,25 +253,15 @@ func ExampleEvaluate() {
 
 func ExampleParseAndEvaluate() {
 	expr := `$car in ('bwm', 'byd') and (3 + echo_int(2)) * 2.0 = 10 and startsWith($car, 'b')`
-	parser := NewParser()
 	var tInt = func(a int64) int64 {
 		return a
 	}
-	if err := parser.RegisterFunc(`echo_int`, tInt); err != nil {
-		panic(err)
-	}
-	//tree, err := parser.Parse(expr)
-	tree, err := parser.ParseWithCache(expr)
-	if err != nil {
+	if err := RegisterFunc(`echo_int`, tInt); err != nil {
 		panic(err)
 	}
 
 	variables := map[string]interface{}{`car`: `byd`}
-	evaluator, err := NewEvaluatorWithParser(tree, parser, variables)
-	if err != nil {
-		panic(err)
-	}
-	result, err := evaluator.Evaluate()
+	result, err := Evaluate(expr, variables)
 	if err != nil {
 		panic(err)
 	}

@@ -1,8 +1,9 @@
 package expr
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func testBool() bool {
@@ -22,11 +23,11 @@ func testString() string {
 }
 
 func TestMain(t *testing.M) {
-	builtinFuncs[`t_bool`] = testBool
-	builtinFuncs[`t_int`] = testInt
-	builtinFuncs[`t_float`] = testFloat
-	builtinFuncs[`t_string`] = testString
-	builtinFuncs[`testArgs`] = testArgs
+	RegisterFunc(`t_bool`, testBool)
+	RegisterFunc(`t_int`, testInt)
+	RegisterFunc(`t_float`, testFloat)
+	RegisterFunc(`t_string`, testString)
+	RegisterFunc(`testArgs`, testArgs)
 	t.Run()
 }
 

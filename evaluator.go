@@ -2,11 +2,12 @@ package expr
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/EchoUtopia/expr/parser"
 	"github.com/EchoUtopia/zerror"
 	"github.com/antlr/antlr4/runtime/Go/antlr"
-	"reflect"
-	"strings"
 )
 
 type evaluator struct {
@@ -15,8 +16,7 @@ type evaluator struct {
 	variables map[string]interface{}
 }
 
-func NewEvaluatorWithParser(tree antlr.Tree, parserI Parser, vars map[string]interface{}) (*evaluator, error) {
-	parser := parserI.(*listenerForParse)
+func NewEvaluatorWithParser(tree antlr.Tree, parser *listenerForParse, vars map[string]interface{}) (*evaluator, error) {
 	if err := checkSetVariables(vars); err != nil {
 		return nil, err
 	}
@@ -28,19 +28,17 @@ func NewEvaluatorWithParser(tree antlr.Tree, parserI Parser, vars map[string]int
 	}, nil
 }
 
-// Evaluate evaluate expr with custom variables and functions
-func Evaluate(expr string, vars map[string]interface{}, funcs map[string]interface{}) (bool, error) {
+// Evaluate evaluate expr with custom variables
+func Evaluate(expr string, vars map[string]interface{}) (bool, error) {
 	parser := NewParser()
-	for k, v := range funcs {
-		if err := parser.RegisterFunc(k, v); err != nil {
-			return false, err
-		}
-	}
 	tree, err := parser.ParseWithCache(expr)
 	if err != nil {
 		return false, err
 	}
 	ev, err := NewEvaluatorWithParser(tree, parser, vars)
+	if err != nil {
+		return false, err
+	}
 	result, err := ev.Evaluate()
 	return result, err
 }

@@ -43,7 +43,7 @@ func ExampleEvaluate() {
 	expr := `$car in ('bwm', 'byd') and (3 + 2) * 2.0 = 10 and startsWith($car, 'b')`
 
 	variables := map[string]interface{}{`car`: `byd`}
-	result, err := Evaluate(expr, variables, nil)
+	result, err := Evaluate(expr, variables)
 	if err != nil {
 		panic(err)
 	}
@@ -59,28 +59,15 @@ func ExampleEvaluate() {
 
 func ExampleParseAndEvaluate() {
 	expr := `$car in ('bwm', 'byd') and (3 + echo_int(2)) * 2.0 = 10 and startsWith($car, 'b')`
-
-	parser := NewParser()
-
 	var tInt = func(a int64) int64 {
 		return a
 	}
-	if err := parser.RegisterFunc(`echo_int`, tInt); err != nil {
-		panic(err)
-	}
-
-	//tree, err := parser.Parse(expr)
-	tree, err := parser.ParseWithCache(expr)
-	if err != nil {
+	if err := RegisterFunc(`echo_int`, tInt); err != nil {
 		panic(err)
 	}
 
 	variables := map[string]interface{}{`car`: `byd`}
-	evaluator, err := NewEvaluatorWithParser(tree, parser, variables)
-	if err != nil {
-		panic(err)
-	}
-	result, err := evaluator.Evaluate()
+	result, err := Evaluate(expr, variables)
 	if err != nil {
 		panic(err)
 	}
