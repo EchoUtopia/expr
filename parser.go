@@ -64,6 +64,13 @@ type parsedPools struct {
 
 var pools = &parsedPools{trees: map[string]antlr.Tree{}}
 
+type Parser interface{
+	Parse(input string) (tree antlr.Tree, err error)
+	ParseWithCache(input string) (antlr.Tree, error)
+	RegisterFunc(name string, fn interface{}) error
+
+}
+
 type listenerForParse struct {
 	*ErrorListener
 	*parser.BaseExprListener
@@ -74,7 +81,7 @@ type listenerForParse struct {
 	argFirstTypes map[string]reflect.Kind
 }
 
-func NewParser() *listenerForParse {
+func NewParser() Parser {
 	walker := &ParseTreeWalker{}
 	parser := &listenerForParse{
 		ErrorListener:    &ErrorListener{walker: walker},

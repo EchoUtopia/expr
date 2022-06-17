@@ -15,7 +15,8 @@ type evaluator struct {
 	variables map[string]interface{}
 }
 
-func NewEvaluatorWithParser(tree antlr.Tree, parser *listenerForParse, vars map[string]interface{}) (*evaluator, error) {
+func NewEvaluatorWithParser(tree antlr.Tree, parserI Parser, vars map[string]interface{}) (*evaluator, error) {
+	parser := parserI.(*listenerForParse)
 	if err := checkSetVariables(vars); err != nil {
 		return nil, err
 	}
